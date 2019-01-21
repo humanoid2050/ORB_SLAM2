@@ -24,15 +24,16 @@
 #include "Map.h"
 #include "MapPoint.h"
 #include "KeyFrame.h"
+//#include "KeyFrameAndPose.h"
 #include "LoopClosing.h"
 #include "Frame.h"
 
-#include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
+#include "Thirdparty/g2o/g2o/types/sim3.h"
 
 namespace ORB_SLAM2
 {
 
-class LoopClosing;
+//class LoopClosing;
 
 class Optimizer
 {

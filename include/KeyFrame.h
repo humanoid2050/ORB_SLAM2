@@ -233,6 +233,7 @@ protected:
     std::mutex mMutexFeatures;
 };
 
+
 } //namespace ORB_SLAM
 
 #endif // KEYFRAME_H

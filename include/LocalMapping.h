@@ -102,7 +102,6 @@ protected:
     Map* mpMap;
 
     LoopClosing* mpLoopCloser;
-    Tracking* mpTracker;
 
     std::list<KeyFrame*> mlNewKeyFrames;
 
