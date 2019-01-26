@@ -175,6 +175,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     :mpORBvocabulary(voc),mpORBextractorLeft(extractor),mpORBextractorRight(static_cast<ORBextractor*>(NULL)),
      mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth)
 {
+    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     // Frame ID
     mnId=nNextId++;
 
@@ -187,15 +188,17 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     mvLevelSigma2 = mpORBextractorLeft->GetScaleSigmaSquares();
     mvInvLevelSigma2 = mpORBextractorLeft->GetInverseScaleSigmaSquares();
 
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     // ORB extraction
     ExtractORB(0,imGray);
-
+    std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
     N = mvKeys.size();
 
     if(mvKeys.empty())
         return;
 
     UndistortKeyPoints();
+    std::chrono::steady_clock::time_point t4 = std::chrono::steady_clock::now();
 
     // Set no stereo information
     mvuRight = vector<float>(N,-1);
@@ -223,8 +226,15 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     }
 
     mb = mbf/fx;
-
+    std::chrono::steady_clock::time_point t5 = std::chrono::steady_clock::now();
     AssignFeaturesToGrid();
+    std::chrono::steady_clock::time_point t6 = std::chrono::steady_clock::now();
+    
+    d1 = (t2 - t1);
+    d2 = (t3 - t2);
+    d3 = (t4 - t3);
+    d4 = (t5 - t4);
+    d5 = (t6 - t5);
 }
 
 void Frame::AssignFeaturesToGrid()

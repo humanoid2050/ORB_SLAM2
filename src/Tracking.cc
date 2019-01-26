@@ -44,7 +44,8 @@ namespace ORB_SLAM2
 
 Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, Map *pMap, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor):
     mState(NO_IMAGES_YET), mSensor(sensor), mbOnlyTracking(false), mbVO(false), mpORBVocabulary(pVoc),
-    mpKeyFrameDB(pKFDB), mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys),  mpMap(pMap), mnLastRelocFrameId(0),d1(0),d2(0), d3(0),d4(0)
+    mpKeyFrameDB(pKFDB), mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys),  mpMap(pMap), mnLastRelocFrameId(0),
+    d1(0),d2(0), d3(0),d4(0),d5(0),  df1(0),df2(0), df3(0),df4(0),df5(0)
 {
     // Load camera parameters from settings file
 
@@ -248,16 +249,24 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
         else
             cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
     }
-    
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     if(mState==NOT_INITIALIZED || mState==NO_IMAGES_YET)
         mCurrentFrame = Frame(mImGray,timestamp,mpIniORBextractor,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
     else
         mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
-    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-    Track();
     std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
-    d1 += (t3 - t1);
-    d4 += (t2 - t1);
+    Track();
+    std::chrono::steady_clock::time_point t4 = std::chrono::steady_clock::now();
+    d1 += (t4 - t1);
+    d4 += (t3 - t2);
+    d5 += (t2 - t1);
+    
+    df1 += mCurrentFrame.d1;
+    df2 += mCurrentFrame.d2;
+    df3 += mCurrentFrame.d3;
+    df4 += mCurrentFrame.d4;
+    df5 += mCurrentFrame.d5;
+    
     return mCurrentFrame.mTcw.clone();
 }
 

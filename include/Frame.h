@@ -31,6 +31,7 @@
 #include "ORBextractor.h"
 
 #include <opencv2/opencv.hpp>
+#include <chrono>
 
 namespace ORB_SLAM2
 {
@@ -206,6 +207,13 @@ private:
     cv::Mat mtcw;
     cv::Mat mRwc;
     cv::Mat mOw; //==mtwc
+    
+public:
+    std::chrono::steady_clock::duration d1;
+    std::chrono::steady_clock::duration d2;
+    std::chrono::steady_clock::duration d3;
+    std::chrono::steady_clock::duration d4;
+    std::chrono::steady_clock::duration d5;
 };
 
 }// namespace ORB_SLAM

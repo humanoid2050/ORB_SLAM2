@@ -209,6 +209,13 @@ public:
     std::chrono::steady_clock::duration d2;
     std::chrono::steady_clock::duration d3;
     std::chrono::steady_clock::duration d4;
+    std::chrono::steady_clock::duration d5;
+    
+    std::chrono::steady_clock::duration df1;
+    std::chrono::steady_clock::duration df2;
+    std::chrono::steady_clock::duration df3;
+    std::chrono::steady_clock::duration df4;
+    std::chrono::steady_clock::duration df5;
 };
 
 } //namespace ORB_SLAM

@@ -411,9 +411,17 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
     cout << "> time in System::TrackMonocular pre Tracking::GrabImageMonocular: " << track_mono_dur_a.count() << endl;
     cout << "> time in System::TrackMonocular calling Tracking::GrabImageMonocular: " << dur_grab_image_mono.count() << endl;
     cout << "    time in Tracking::GrabImageMonocular: " << mpTracker->d1.count() << endl;
+    cout << "    > time in Tracking::GrabImageMonocular converting to GRAY: " << mpTracker->d5.count() << endl;
     cout << "    > time in Tracking::GrabImageMonocular constructing new Frame: " << mpTracker->d4.count() << endl;
-    cout << "    > time in Tracking::Track: " << mpTracker->d2.count() << endl;
-    cout << "    - time in Tracking::Relocalization: " << mpTracker->d3.count() << endl;
+    
+    cout << "      > time 1 in Frame constructor : " << mpTracker->df1.count() << endl;
+    cout << "      > time 2 in Frame constructor : " << mpTracker->df2.count() << endl;
+    cout << "      > time 3 in Frame constructor : " << mpTracker->df3.count() << endl;
+    cout << "      > time 4 in Frame constructor : " << mpTracker->df4.count() << endl;
+    cout << "      > time 5 in Frame constructor : " << mpTracker->df5.count() << endl;
+    
+    cout << "      - time in Tracking::Track: " << mpTracker->d2.count() << endl;
+    cout << "      - time in Tracking::Relocalization: " << mpTracker->d3.count() << endl;
     cout << "> time in System::TrackMonocular post Tracking::GrabImageMonocular: " << track_mono_dur_b.count() << endl;
     
     
