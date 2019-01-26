@@ -44,7 +44,7 @@ namespace ORB_SLAM2
 
 Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, Map *pMap, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor):
     mState(NO_IMAGES_YET), mSensor(sensor), mbOnlyTracking(false), mbVO(false), mpORBVocabulary(pVoc),
-    mpKeyFrameDB(pKFDB), mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys),  mpMap(pMap), mnLastRelocFrameId(0)
+    mpKeyFrameDB(pKFDB), mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys),  mpMap(pMap), mnLastRelocFrameId(0),d1(0),d2(0), d3(0),d4(0)
 {
     // Load camera parameters from settings file
 
@@ -155,14 +155,7 @@ void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
 {
     mpLoopClosing=pLoopClosing;
 }
-/*
-void Tracking::SetViewerComponents(Viewer *pViewer,FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer)
-{
-    mpViewer=pViewer;
-    mpFrameDrawer = pFrameDrawer;
-    mpMapDrawer = pMapDrawer;
-}
-*/
+
 
 cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp)
 {
@@ -237,6 +230,8 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
 
 cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
 {
+    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+    
     mImGray = im;
 
     if(mImGray.channels()==3)
@@ -253,19 +248,22 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
         else
             cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
     }
-
+    
     if(mState==NOT_INITIALIZED || mState==NO_IMAGES_YET)
         mCurrentFrame = Frame(mImGray,timestamp,mpIniORBextractor,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
     else
         mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
-
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     Track();
-
+    std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
+    d1 += (t3 - t1);
+    d4 += (t2 - t1);
     return mCurrentFrame.mTcw.clone();
 }
 
 void Tracking::Track()
 {
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     if(mState==NO_IMAGES_YET)
     {
         mState = NOT_INITIALIZED;
@@ -282,8 +280,6 @@ void Tracking::Track()
             StereoInitialization();
         else
             MonocularInitialization();
-
-        //if (mpFrameDrawer) mpFrameDrawer->Update(this);
 
         if(mState!=OK)
             return;
@@ -414,9 +410,6 @@ void Tracking::Track()
         else
             mState=LOST;
 
-        // Update drawer
-        //if (mpFrameDrawer) mpFrameDrawer->Update(this);
-
         // If tracking were good, check if we insert a keyframe
         if(bOK)
         {
@@ -430,8 +423,6 @@ void Tracking::Track()
             }
             else
                 mVelocity = cv::Mat();
-
-            //if (mpMapDrawer) mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
 
             // Clean VO matches
             for(int i=0; i<mCurrentFrame.N; i++)
@@ -502,7 +493,7 @@ void Tracking::Track()
         mlFrameTimes.push_back(mlFrameTimes.back());
         mlbLost.push_back(mState==LOST);
     }
-
+    d2 += (std::chrono::steady_clock::now() - t2);
 }
 
 
@@ -553,8 +544,6 @@ void Tracking::StereoInitialization()
         mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
 
         mpMap->mvpKeyFrameOrigins.push_back(pKFini);
-
-        //if (mpMapDrawer) mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
 
         mState=OK;
     }
@@ -728,8 +717,6 @@ void Tracking::CreateInitialMapMonocular()
     mLastFrame = Frame(mCurrentFrame);
 
     mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
-
-    //if (mpMapDrawer) mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
 
     mpMap->mvpKeyFrameOrigins.push_back(pKFini);
 
@@ -1340,6 +1327,7 @@ void Tracking::UpdateLocalKeyFrames()
 
 bool Tracking::Relocalization()
 {
+    std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
     // Compute Bag of Words Vector
     mCurrentFrame.ComputeBoW();
 
@@ -1498,21 +1486,14 @@ bool Tracking::Relocalization()
         mnLastRelocFrameId = mCurrentFrame.mnId;
         return true;
     }
-
+    d3 += (std::chrono::steady_clock::now() - t3);
 }
 
 void Tracking::Reset()
 {
 
     cout << "System Reseting" << endl;
-/*
-    if(mpViewer)
-    {
-        mpViewer->RequestStop();
-        while(!mpViewer->isStopped())
-            usleep(3000);
-    }
-*/
+
     // Reset Local Mapping
     cout << "Reseting Local Mapper...";
     mpLocalMapper->RequestReset();
@@ -1545,8 +1526,6 @@ void Tracking::Reset()
     mlpReferences.clear();
     mlFrameTimes.clear();
     mlbLost.clear();
-
-    //if(mpViewer) mpViewer->Release();
 }
 
 void Tracking::ChangeCalibration(const string &strSettingPath)
@@ -1586,7 +1565,5 @@ void Tracking::InformOnlyTracking(const bool &flag)
 {
     mbOnlyTracking = flag;
 }
-
-
 
 } //namespace ORB_SLAM

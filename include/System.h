@@ -40,8 +40,6 @@
 namespace ORB_SLAM2
 {
 
-class Viewer;
-class FrameDrawer;
 class Map;
 class Tracking;
 class LocalMapping;
@@ -59,7 +57,7 @@ public:
 
 public:
 
-    // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
+    // Initialize the SLAM system. It launches the Local Mapping, and Loop Closing threads.
     System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor);
 
     // Proccess the given stereo frame. Images must be synchronized and rectified.
@@ -149,17 +147,10 @@ private:
     // a pose graph optimization and full bundle adjustment (in a new thread) afterwards.
     LoopClosing* mpLoopCloser;
 
-    // The viewer draws the map and the current camera pose. It uses Pangolin.
-    //Viewer* mpViewer;
-
-    //FrameDrawer* mpFrameDrawer;
-    //MapDrawer* mpMapDrawer;
-
-    // System threads: Local Mapping, Loop Closing, Viewer.
+    // System threads: Local Mapping, Loop Closing.
     // The Tracking thread "lives" in the main execution thread that creates the System object.
     std::thread* mptLocalMapping;
     std::thread* mptLoopClosing;
-    //std::thread* mptViewer;
 
     // Reset flag
     std::mutex mMutexReset;
@@ -175,6 +166,12 @@ private:
     std::vector<MapPoint*> mTrackedMapPoints;
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
+public:
+    uint32_t wait_count;
+    std::chrono::steady_clock::duration track_mono_dur;
+    std::chrono::steady_clock::duration track_mono_dur_a;
+    std::chrono::steady_clock::duration track_mono_dur_b;
+    std::chrono::steady_clock::duration dur_grab_image_mono;
 };
 
 }// namespace ORB_SLAM

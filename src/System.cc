@@ -29,7 +29,8 @@ namespace ORB_SLAM2
 {
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor) : 
-        mSensor(sensor), mbReset(false),mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false)
+        mSensor(sensor), mbReset(false),mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false),
+        wait_count(0),track_mono_dur(0),track_mono_dur_a(0),track_mono_dur_b(0),dur_grab_image_mono(0)
 {
     // Output welcome message
     cout << endl <<
@@ -55,7 +56,6 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
        exit(-1);
     }
 
-
     //Load ORB Vocabulary
     cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
 
@@ -75,10 +75,6 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     //Create the Map
     mpMap = new Map();
 
-    //Create Drawers. These are used by the Viewer
-    //mpFrameDrawer = new FrameDrawer(mpMap);
-    //mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
-
     //Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this constructor)
     mpTracker = new Tracking(this, mpVocabulary, mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
@@ -90,8 +86,6 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     //Initialize the Loop Closing thread and launch
     mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR);
     mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
-
-    //Initialize the Viewer thread and launch
 
     //Set pointers between threads
     mpTracker->SetLocalMapper(mpLocalMapper);
@@ -206,6 +200,7 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
 
 cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
 {
+    const std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     if(mSensor!=MONOCULAR)
     {
         cerr << "ERROR: you called TrackMonocular but input sensor was not set to Monocular." << endl;
@@ -223,6 +218,7 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
             while(!mpLocalMapper->isStopped())
             {
                 usleep(1000);
+                wait_count +=1;
             }
 
             mpTracker->InformOnlyTracking(true);
@@ -245,14 +241,28 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
         mbReset = false;
     }
     }
-
+    const std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    
+    
     cv::Mat Tcw = mpTracker->GrabImageMonocular(im,timestamp);
-
+    
+    const std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
+    
+    
     unique_lock<mutex> lock2(mMutexState);
     mTrackingState = mpTracker->mState;
     mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
-
+    
+    const std::chrono::steady_clock::time_point t4 = std::chrono::steady_clock::now();
+    assert(t2>t1);
+    assert(t3>t2);
+    assert(t4>t3);
+    track_mono_dur_a += (t2 - t1);
+    dur_grab_image_mono += (t3-t2);
+    track_mono_dur_b += (t4 - t3);
+    track_mono_dur += (t4 - t1);
+    
     return Tcw;
 }
 
@@ -291,14 +301,7 @@ void System::Shutdown()
 {
     mpLocalMapper->RequestFinish();
     mpLoopCloser->RequestFinish();
-/*
-    if(mpViewer)
-    {
-        mpViewer->RequestFinish();
-        while(!mpViewer->isFinished())
-            usleep(5000);
-    }
-*/
+
     // Wait until all thread have effectively stopped
     while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
     {
@@ -402,6 +405,18 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
 
     f.close();
     cout << endl << "trajectory saved!" << endl;
+    
+    
+    cout << "time in System::TrackMonocular: " << track_mono_dur.count() << endl;
+    cout << "> time in System::TrackMonocular pre Tracking::GrabImageMonocular: " << track_mono_dur_a.count() << endl;
+    cout << "> time in System::TrackMonocular calling Tracking::GrabImageMonocular: " << dur_grab_image_mono.count() << endl;
+    cout << "    time in Tracking::GrabImageMonocular: " << mpTracker->d1.count() << endl;
+    cout << "    > time in Tracking::GrabImageMonocular constructing new Frame: " << mpTracker->d4.count() << endl;
+    cout << "    > time in Tracking::Track: " << mpTracker->d2.count() << endl;
+    cout << "    - time in Tracking::Relocalization: " << mpTracker->d3.count() << endl;
+    cout << "> time in System::TrackMonocular post Tracking::GrabImageMonocular: " << track_mono_dur_b.count() << endl;
+    
+    
 }
 
 void System::SaveTrajectoryKITTI(const string &filename)
