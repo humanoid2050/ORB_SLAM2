@@ -412,6 +412,9 @@ ORBextractor::ORBextractor(int _nfeatures, float _scaleFactor, int _nlevels,
     nfeatures(_nfeatures), scaleFactor(_scaleFactor), nlevels(_nlevels),
     iniThFAST(_iniThFAST), minThFAST(_minThFAST)
 {
+    orb_ptr_ = cv::ORB::create(_nfeatures,_scaleFactor,_nlevels);
+    orb_ptr_->setFastThreshold(_iniThFAST);
+    
     mvScaleFactor.resize(nlevels);
     mvLevelSigma2.resize(nlevels);
     mvScaleFactor[0]=1.0f;
@@ -1045,6 +1048,9 @@ void ORBextractor::operator()( InputArray _image, InputArray _mask, vector<KeyPo
 { 
     if(_image.empty())
         return;
+
+    orb_ptr_->detectAndCompute(_image,_mask,_keypoints,_descriptors);
+    return;
 
     Mat image = _image.getMat();
     assert(image.type() == CV_8UC1 );
