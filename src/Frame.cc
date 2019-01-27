@@ -256,10 +256,13 @@ void Frame::AssignFeaturesToGrid()
 
 inline void Frame::ExtractORB(int flag, const cv::UMat &im)
 {
-    if(flag==0)
-        (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,mDescriptors);
-    else
-        (*mpORBextractorRight)(im,cv::UMat(),mvKeysRight,mDescriptorsRight);
+    if(flag==0) {
+        (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,mUDescriptors);
+        mDescriptors = mUDescriptors.getMat(cv::ACCESS_READ);
+    } else {
+        (*mpORBextractorRight)(im,cv::UMat(),mvKeysRight,mUDescriptorsRight);
+        mDescriptorsRight = mUDescriptorsRight.getMat(cv::ACCESS_READ);
+    }
 }
 
 void Frame::SetPose(cv::Mat Tcw)
