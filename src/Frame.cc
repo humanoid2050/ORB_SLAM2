@@ -188,9 +188,16 @@ Frame::Frame(const cv::UMat &imGray, const double &timeStamp, ORBextractor* extr
     mvLevelSigma2 = mpORBextractorLeft->GetScaleSigmaSquares();
     mvInvLevelSigma2 = mpORBextractorLeft->GetInverseScaleSigmaSquares();
 
-    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    
     // ORB extraction
-    ExtractORB(0,imGray);
+    //ExtractORB(0,imGray);
+    
+    cv::UMat desc;
+    (*mpORBextractorLeft)(imGray,cv::UMat(),mvKeys,desc);
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    desc.getMat(cv::ACCESS_FAST).copyTo(mDescriptors);
+        
+        
     std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
     N = mvKeys.size();
 

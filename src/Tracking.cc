@@ -261,7 +261,7 @@ cv::Mat Tracking::GrabImageMonocular(const cv::UMat &im, const double &timestamp
     d1 += (t4 - t1);
     d4 += (t3 - t2);
     d5 += (t2 - t1);
-    std::cout << "frame construction, orb extraction, and track timings: " << (t3 - t2).count() << " " << mCurrentFrame.d2.count() << " " << (t4 - t3).count() << std::endl;
+    //std::cout << "frame construction, orb extraction, and track timings: " << (t3 - t2).count() << " " << mCurrentFrame.d2.count() << " " << (t4 - t3).count() << std::endl;
     df1 += mCurrentFrame.d1;
     df2 += mCurrentFrame.d2;
     df3 += mCurrentFrame.d3;
