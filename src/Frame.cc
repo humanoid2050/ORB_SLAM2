@@ -260,6 +260,8 @@ inline void Frame::ExtractORB(int flag, const cv::UMat &im)
         (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,mDescriptors);
     } else
         (*mpORBextractorRight)(im,cv::UMat(),mvKeysRight,mDescriptorsRight);
+        
+    std::cout << "descriptor dims: " << mDescriptors.rows << " " << mDescriptors.cols << std::endl;
 }
 
 void Frame::SetPose(cv::Mat Tcw)
