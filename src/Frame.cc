@@ -257,12 +257,12 @@ void Frame::AssignFeaturesToGrid()
 inline void Frame::ExtractORB(int flag, const cv::UMat &im)
 {
     if(flag==0) {
-        (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,mUDescriptors);
-        mDescriptors = mUDescriptors.getMat(cv::ACCESS_READ);
-    } else {
-        (*mpORBextractorRight)(im,cv::UMat(),mvKeysRight,mUDescriptorsRight);
-        mDescriptorsRight = mUDescriptorsRight.getMat(cv::ACCESS_READ);
-    }
+        cv::UMat desc;
+        (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,desc);
+        desc.getMat(cv::ACCESS_READ).copyTo(mDescriptors);
+        //desc.release();
+    } else
+        (*mpORBextractorRight)(im,cv::UMat(),mvKeysRight,mDescriptorsRight);
 }
 
 void Frame::SetPose(cv::Mat Tcw)
