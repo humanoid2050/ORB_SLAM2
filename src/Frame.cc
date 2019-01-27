@@ -22,6 +22,7 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include <thread>
+#include <opencv2/core/ocl.hpp>
 
 namespace ORB_SLAM2
 {
@@ -193,6 +194,11 @@ Frame::Frame(const cv::UMat &imGray, const double &timeStamp, ORBextractor* extr
     //ExtractORB(0,imGray);
     
     cv::UMat desc;
+    cv::InputArray tmp(imGray);
+    cv::OutputArray tmp2(desc);
+    //cv::ocl::internal::isOpenCLForced();
+    //bool useOCL = cv::ocl::useOpenCL() && OCL_FORCE_CHECK(tmp.isUMat() || tmp2.isUMat());
+    std::cout << "useOCL: " << cv::ocl::useOpenCL() << std::endl;
     (*mpORBextractorLeft)(imGray,cv::UMat(),mvKeys,desc);
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     desc.getMat(cv::ACCESS_FAST).copyTo(mDescriptors);
