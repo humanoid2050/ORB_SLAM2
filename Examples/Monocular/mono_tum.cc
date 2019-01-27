@@ -64,11 +64,11 @@ int main(int argc, char **argv)
     
     std::chrono::steady_clock::duration track_time(0);
     // Main loop
-    cv::Mat im;
+    cv::UMat im;
     for(int ni=0; ni<nImages; ni++)
     {
         // Read image from file
-        im = cv::imread(string(argv[3])+"/"+vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED);
+        cv::imread(string(argv[3])+"/"+vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED).copyTo(im);
         double tframe = vTimestamps[ni];
 
         if(im.empty())

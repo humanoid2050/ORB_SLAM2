@@ -157,7 +157,7 @@ void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
     mpLoopClosing=pLoopClosing;
 }
 
-
+/*
 cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp)
 {
     imRectLeft.copyTo(mImGray);
@@ -228,13 +228,13 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
 
     return mCurrentFrame.mTcw.clone();
 }
+*/
 
-
-cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
+cv::Mat Tracking::GrabImageMonocular(const cv::UMat &im, const double &timestamp)
 {
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     
-    im.copyTo(mImGray);
+    mImGray = im;
 
     if(mImGray.channels()==3)
     {

@@ -57,7 +57,7 @@ Frame::Frame(const Frame &frame)
         SetPose(frame.mTcw);
 }
 
-
+/*
 Frame::Frame(const cv::UMat &imLeft, const cv::UMat &imRight, const double &timeStamp, ORBextractor* extractorLeft, ORBextractor* extractorRight, ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth)
     :mpORBvocabulary(voc),mpORBextractorLeft(extractorLeft),mpORBextractorRight(extractorRight), mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth),
      mpReferenceKF(static_cast<KeyFrame*>(NULL))
@@ -169,7 +169,7 @@ Frame::Frame(const cv::UMat &imGray, const cv::Mat &imDepth, const double &timeS
 
     AssignFeaturesToGrid();
 }
-
+*/
 
 Frame::Frame(const cv::UMat &imGray, const double &timeStamp, ORBextractor* extractor,ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth)
     :mpORBvocabulary(voc),mpORBextractorLeft(extractor),mpORBextractorRight(static_cast<ORBextractor*>(NULL)),
@@ -257,10 +257,7 @@ void Frame::AssignFeaturesToGrid()
 inline void Frame::ExtractORB(int flag, const cv::UMat &im)
 {
     if(flag==0) {
-        cv::UMat desc;
-        (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,desc);
-        desc.getMat(cv::ACCESS_READ).copyTo(mDescriptors);
-        //desc.release();
+        (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,mDescriptors);
     } else
         (*mpORBextractorRight)(im,cv::UMat(),mvKeysRight,mDescriptorsRight);
 }
@@ -535,7 +532,7 @@ void Frame::ComputeStereoMatches()
         int bestDist = ORBmatcher::TH_HIGH;
         size_t bestIdxR = 0;
 
-        const cv::Mat &dL = mDescriptors.row(iL);
+        const cv::Mat &dL = mDescriptors.row(iL).getMat(cv::ACCESS_READ);
 
         // Compare descriptor to right keypoints
         for(size_t iC=0; iC<vCandidates.size(); iC++)
@@ -550,7 +547,7 @@ void Frame::ComputeStereoMatches()
 
             if(uR>=minU && uR<=maxU)
             {
-                const cv::Mat &dR = mDescriptorsRight.row(iR);
+                const cv::Mat &dR = mDescriptorsRight.row(iR).getMat(cv::ACCESS_READ);
                 const int dist = ORBmatcher::DescriptorDistance(dL,dR);
 
                 if(dist<bestDist)

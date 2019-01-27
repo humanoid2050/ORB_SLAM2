@@ -95,7 +95,7 @@ int ORBmatcher::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
                     continue;
             }
 
-            const cv::Mat &d = F.mDescriptors.row(idx);
+            const cv::Mat &d = F.mDescriptors.row(idx).getMat(cv::ACCESS_READ);
 
             const int dist = DescriptorDistance(MPdescriptor,d);
 
@@ -196,7 +196,7 @@ int ORBmatcher::SearchByBoW(KeyFrame* pKF,Frame &F, vector<MapPoint*> &vpMapPoin
                 if(pMP->isBad())
                     continue;                
 
-                const cv::Mat &dKF= pKF->mDescriptors.row(realIdxKF);
+                const cv::Mat &dKF= pKF->mDescriptors.row(realIdxKF).getMat(cv::ACCESS_READ);
 
                 int bestDist1=256;
                 int bestIdxF =-1 ;
@@ -209,7 +209,7 @@ int ORBmatcher::SearchByBoW(KeyFrame* pKF,Frame &F, vector<MapPoint*> &vpMapPoin
                     if(vpMapPointMatches[realIdxF])
                         continue;
 
-                    const cv::Mat &dF = F.mDescriptors.row(realIdxF);
+                    const cv::Mat &dF = F.mDescriptors.row(realIdxF).getMat(cv::ACCESS_READ);
 
                     const int dist =  DescriptorDistance(dKF,dF);
 
@@ -380,7 +380,7 @@ int ORBmatcher::SearchByProjection(KeyFrame* pKF, cv::Mat Scw, const vector<MapP
             if(kpLevel<nPredictedLevel-1 || kpLevel>nPredictedLevel)
                 continue;
 
-            const cv::Mat &dKF = pKF->mDescriptors.row(idx);
+            const cv::Mat &dKF = pKF->mDescriptors.row(idx).getMat(cv::ACCESS_READ);
 
             const int dist = DescriptorDistance(dMP,dKF);
 
@@ -427,7 +427,7 @@ int ORBmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f
         if(vIndices2.empty())
             continue;
 
-        cv::Mat d1 = F1.mDescriptors.row(i1);
+        cv::Mat d1 = F1.mDescriptors.row(i1).getMat(cv::ACCESS_READ);
 
         int bestDist = INT_MAX;
         int bestDist2 = INT_MAX;
@@ -437,7 +437,7 @@ int ORBmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f
         {
             size_t i2 = *vit;
 
-            cv::Mat d2 = F2.mDescriptors.row(i2);
+            cv::Mat d2 = F2.mDescriptors.row(i2).getMat(cv::ACCESS_READ);
 
             int dist = DescriptorDistance(d1,d2);
 
@@ -524,12 +524,12 @@ int ORBmatcher::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
     const vector<cv::KeyPoint> &vKeysUn1 = pKF1->mvKeysUn;
     const DBoW2::FeatureVector &vFeatVec1 = pKF1->mFeatVec;
     const vector<MapPoint*> vpMapPoints1 = pKF1->GetMapPointMatches();
-    const cv::Mat &Descriptors1 = pKF1->mDescriptors;
+    const cv::Mat Descriptors1 = pKF1->mDescriptors.getMat(cv::ACCESS_READ);
 
     const vector<cv::KeyPoint> &vKeysUn2 = pKF2->mvKeysUn;
     const DBoW2::FeatureVector &vFeatVec2 = pKF2->mFeatVec;
     const vector<MapPoint*> vpMapPoints2 = pKF2->GetMapPointMatches();
-    const cv::Mat &Descriptors2 = pKF2->mDescriptors;
+    const cv::Mat Descriptors2 = pKF2->mDescriptors.getMat(cv::ACCESS_READ);
 
     vpMatches12 = vector<MapPoint*>(vpMapPoints1.size(),static_cast<MapPoint*>(NULL));
     vector<bool> vbMatched2(vpMapPoints2.size(),false);
@@ -710,7 +710,7 @@ int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
                 
                 const cv::KeyPoint &kp1 = pKF1->mvKeysUn[idx1];
                 
-                const cv::Mat &d1 = pKF1->mDescriptors.row(idx1);
+                const cv::Mat &d1 = pKF1->mDescriptors.row(idx1).getMat(cv::ACCESS_READ);
                 
                 int bestDist = TH_LOW;
                 int bestIdx2 = -1;
@@ -731,7 +731,7 @@ int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
                         if(!bStereo2)
                             continue;
                     
-                    const cv::Mat &d2 = pKF2->mDescriptors.row(idx2);
+                    const cv::Mat &d2 = pKF2->mDescriptors.row(idx2).getMat(cv::ACCESS_READ);
                     
                     const int dist = DescriptorDistance(d1,d2);
                     
@@ -937,7 +937,7 @@ int ORBmatcher::Fuse(KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints, const
                     continue;
             }
 
-            const cv::Mat &dKF = pKF->mDescriptors.row(idx);
+            const cv::Mat &dKF = pKF->mDescriptors.row(idx).getMat(cv::ACCESS_READ);
 
             const int dist = DescriptorDistance(dMP,dKF);
 
@@ -1067,7 +1067,7 @@ int ORBmatcher::Fuse(KeyFrame *pKF, cv::Mat Scw, const vector<MapPoint *> &vpPoi
             if(kpLevel<nPredictedLevel-1 || kpLevel>nPredictedLevel)
                 continue;
 
-            const cv::Mat &dKF = pKF->mDescriptors.row(idx);
+            const cv::Mat &dKF = pKF->mDescriptors.row(idx).getMat(cv::ACCESS_READ);
 
             int dist = DescriptorDistance(dMP,dKF);
 
@@ -1207,7 +1207,7 @@ int ORBmatcher::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint*> &
             if(kp.octave<nPredictedLevel-1 || kp.octave>nPredictedLevel)
                 continue;
 
-            const cv::Mat &dKF = pKF2->mDescriptors.row(idx);
+            const cv::Mat &dKF = pKF2->mDescriptors.row(idx).getMat(cv::ACCESS_READ);
 
             const int dist = DescriptorDistance(dMP,dKF);
 
@@ -1287,7 +1287,7 @@ int ORBmatcher::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint*> &
             if(kp.octave<nPredictedLevel-1 || kp.octave>nPredictedLevel)
                 continue;
 
-            const cv::Mat &dKF = pKF1->mDescriptors.row(idx);
+            const cv::Mat &dKF = pKF1->mDescriptors.row(idx).getMat(cv::ACCESS_READ);
 
             const int dist = DescriptorDistance(dMP,dKF);
 
@@ -1412,7 +1412,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
                             continue;
                     }
 
-                    const cv::Mat &d = CurrentFrame.mDescriptors.row(i2);
+                    const cv::Mat &d = CurrentFrame.mDescriptors.row(i2).getMat(cv::ACCESS_READ);
 
                     const int dist = DescriptorDistance(dMP,d);
 
@@ -1541,7 +1541,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF, const set
                     if(CurrentFrame.mvpMapPoints[i2])
                         continue;
 
-                    const cv::Mat &d = CurrentFrame.mDescriptors.row(i2);
+                    const cv::Mat &d = CurrentFrame.mDescriptors.row(i2).getMat(cv::ACCESS_READ);
 
                     const int dist = DescriptorDistance(dMP,d);
 

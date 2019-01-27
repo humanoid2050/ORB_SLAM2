@@ -95,7 +95,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
 }
-
+/*
 cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp)
 {
     if(mSensor!=STEREO)
@@ -197,8 +197,8 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
     return Tcw;
 }
-
-cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
+*/
+cv::Mat System::TrackMonocular(const cv::UMat &im, const double &timestamp)
 {
     const std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     if(mSensor!=MONOCULAR)
