@@ -160,8 +160,9 @@ void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
 
 cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp)
 {
-    mImGray = imRectLeft;
-    cv::Mat imGrayRight = imRectRight;
+    imRectLeft.copyTo(mImGray);
+    cv::UMat imGrayRight;
+    imRectRight.copyTo(imGrayRight);
 
     if(mImGray.channels()==3)
     {
@@ -200,7 +201,7 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
 
 cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const double &timestamp)
 {
-    mImGray = imRGB;
+    imRGB.copyTo(mImGray);
     cv::Mat imDepth = imD;
 
     if(mImGray.channels()==3)
@@ -233,7 +234,7 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
 {
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     
-    mImGray = im;
+    im.copyTo(mImGray);
 
     if(mImGray.channels()==3)
     {
