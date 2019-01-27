@@ -254,12 +254,12 @@ void Frame::AssignFeaturesToGrid()
     }
 }
 
-void Frame::ExtractORB(int flag, const cv::UMat &im)
+inline void Frame::ExtractORB(int flag, const cv::UMat &im)
 {
     if(flag==0)
-        (*mpORBextractorLeft)(im,cv::Mat(),mvKeys,mDescriptors);
+        (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,mDescriptors);
     else
-        (*mpORBextractorRight)(im,cv::Mat(),mvKeysRight,mDescriptorsRight);
+        (*mpORBextractorRight)(im,cv::UMat(),mvKeysRight,mDescriptorsRight);
 }
 
 void Frame::SetPose(cv::Mat Tcw)
