@@ -25,7 +25,7 @@
 #include <chrono>
 
 #include <opencv2/core/core.hpp>
-
+#include <opencv2/core/ocl.hpp>
 #include <System.h>
 
 using namespace std;
@@ -40,6 +40,8 @@ int main(int argc, char **argv)
         cerr << endl << "Usage: ./mono_tum path_to_vocabulary path_to_settings path_to_sequence" << endl;
         return 1;
     }
+    
+    cout << "cv::ocl::useOpenCL() " << cv::ocl::useOpenCL() << endl;
 
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
