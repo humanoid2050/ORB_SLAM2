@@ -257,7 +257,9 @@ void Frame::AssignFeaturesToGrid()
 inline void Frame::ExtractORB(int flag, const cv::UMat &im)
 {
     if(flag==0) {
-        (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,mDescriptors);
+        cv::UMat desc;
+        (*mpORBextractorLeft)(im,cv::UMat(),mvKeys,desc);
+        desc.getMat(cv::ACCESS_FAST).copyTo(mDescriptors);
     } else
         (*mpORBextractorRight)(im,cv::UMat(),mvKeysRight,mDescriptorsRight);
         
@@ -534,7 +536,7 @@ void Frame::ComputeStereoMatches()
         int bestDist = ORBmatcher::TH_HIGH;
         size_t bestIdxR = 0;
 
-        const cv::Mat &dL = mDescriptors.row(iL).getMat(cv::ACCESS_READ);
+        const cv::Mat &dL = mDescriptors.row(iL);
 
         // Compare descriptor to right keypoints
         for(size_t iC=0; iC<vCandidates.size(); iC++)
@@ -549,7 +551,7 @@ void Frame::ComputeStereoMatches()
 
             if(uR>=minU && uR<=maxU)
             {
-                const cv::Mat &dR = mDescriptorsRight.row(iR).getMat(cv::ACCESS_READ);
+                const cv::Mat &dR = mDescriptorsRight.row(iR);
                 const int dist = ORBmatcher::DescriptorDistance(dL,dR);
 
                 if(dist<bestDist)

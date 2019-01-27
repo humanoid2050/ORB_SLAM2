@@ -263,7 +263,7 @@ void MapPoint::ComputeDistinctiveDescriptors()
         KeyFrame* pKF = mit->first;
 
         if(!pKF->isBad())
-            vDescriptors.push_back(pKF->mDescriptors.row(mit->second).getMat(cv::ACCESS_READ));
+            vDescriptors.push_back(pKF->mDescriptors.row(mit->second));
     }
 
     if(vDescriptors.empty())
