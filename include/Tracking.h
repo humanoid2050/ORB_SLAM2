@@ -37,6 +37,8 @@
 #include "System.h"
 
 #include <mutex>
+#include <condition_variable>
+#include <thread>
 
 namespace ORB_SLAM2
 {
@@ -52,6 +54,11 @@ class Tracking
 public:
     Tracking(System* pSys, ORBVocabulary* pVoc, Map* pMap,
              KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
+
+
+    void make_frame_loop();
+    void track_loop();
+    void queueImg(const cv::UMat &im, const double &timestamp);
 
     // Preprocess the input and call Track(). Extract features and performs stereo matching.
     //cv::Mat GrabImageStereo(const cv::Mat &imRectLeft,const cv::Mat &imRectRight, const double &timestamp);
@@ -90,6 +97,7 @@ public:
     // Current Frame
     Frame mCurrentFrame;
     cv::UMat mImGray;
+    double mTimestamp;
 
     // Initialization Variables (Monocular)
     std::vector<int> mvIniLastMatches;
@@ -115,8 +123,6 @@ protected:
     // Main tracking function. It is independent of the input sensor.
     void Track();
 
-    // Map initialization for stereo and RGB-D
-    void StereoInitialization();
 
     // Map initialization for monocular
     void MonocularInitialization();
@@ -216,6 +222,16 @@ public:
     std::chrono::steady_clock::duration df3;
     std::chrono::steady_clock::duration df4;
     std::chrono::steady_clock::duration df5;
+    
+    std::mutex frame_maker_mtx_;
+    std::mutex tracker_mtx_;
+    std::condition_variable frame_maker_cv_;
+    std::condition_variable tracker_cv_;
+    std::array<std::thread,2> worker_threads_;
+    std::thread tracker_thread_;
+    bool stop_threads_;
+    bool new_image_ready_;
+    bool new_frame_ready_;
 };
 
 } //namespace ORB_SLAM

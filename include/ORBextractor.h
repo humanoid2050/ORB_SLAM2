@@ -25,6 +25,7 @@
 #include <list>
 #include <opencv/cv.h>
 #include <opencv2/features2d.hpp>
+#include <opencv2/core/ocl.hpp>
 
 namespace ORB_SLAM2
 {
@@ -52,6 +53,24 @@ public:
                  int iniThFAST, int minThFAST);
 
     ~ORBextractor(){}
+    
+    static bool
+    ocl_HarrisResponses(const cv::UMat& imgbuf,
+                    const cv::UMat& layerinfo,
+                    const cv::UMat& keypoints,
+                    cv::UMat& responses,
+                    int nkeypoints, int blockSize, float harris_k);
+                    
+    static bool
+    ocl_ICAngles(const cv::UMat& imgbuf, const cv::UMat& layerinfo,
+             const cv::UMat& keypoints, cv::UMat& responses,
+             const cv::UMat& umax, int nkeypoints, int half_k);
+             
+             
+    static bool
+    ocl_computeOrbDescriptors(const cv::UMat& imgbuf, const cv::UMat& layerInfo,
+                          const cv::UMat& keypoints, cv::UMat& desc, const cv::UMat& pattern,
+                          int nkeypoints, int dsize, int wta_k);
 
     // Compute the ORB features and descriptors on an image.
     // ORB are dispersed on the image using an octree.

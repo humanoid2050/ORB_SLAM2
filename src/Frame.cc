@@ -172,7 +172,7 @@ Frame::Frame(const cv::UMat &imGray, const cv::Mat &imDepth, const double &timeS
 }
 */
 
-Frame::Frame(const cv::UMat &imGray, const double &timeStamp, ORBextractor* extractor,ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth)
+Frame::Frame(const cv::UMat &imGray, const double &timeStamp, ORBextractor* extractor,ORBVocabulary* voc, const cv::Mat &K, const cv::Mat &distCoef, const float &bf, const float &thDepth)
     :mpORBvocabulary(voc),mpORBextractorLeft(extractor),mpORBextractorRight(static_cast<ORBextractor*>(NULL)),
      mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth)
 {
