@@ -44,14 +44,16 @@ namespace ORB_SLAM2
     
 void Tracking::queueImg(const cv::UMat &im, const double &timestamp)
 {
-    //cout << "queueing" <<endl;
+    cout << "queueing" <<endl;
     {
         std::unique_lock<std::mutex> lk(frame_maker_mtx_);
         mImGray = im;
         mTimestamp = timestamp;
         new_image_ready_ = true;
     }
+    cout << "submitted" <<endl;
     frame_maker_cv_.notify_one();
+    
 }
 
 void Tracking::make_frame_loop() 
@@ -61,11 +63,12 @@ void Tracking::make_frame_loop()
     Frame localFrame;
     while (true)
     {
-        //cout << "making frame" <<endl;
+        
         {
             std::unique_lock<std::mutex> lk(frame_maker_mtx_);
             frame_maker_cv_.wait(lk, [this]{return new_image_ready_ || stop_threads_;});
             if (stop_threads_) break;
+            cout << "making frame in " << std::this_thread::get_id() <<endl;
             mImGray.copyTo(localImg);
             localTime = mTimestamp;
             new_image_ready_ = false;
@@ -91,18 +94,22 @@ void Tracking::make_frame_loop()
             std::swap(mCurrentFrame,localFrame);
             new_frame_ready_ = true;
         }
+        cout << "finished frame in " << std::this_thread::get_id() <<endl;
         tracker_cv_.notify_one();
+        
     }
 }
 
 void Tracking::track_loop()
 {
     while (true) {
-        cout << "tracking" <<endl;
+        
         std::unique_lock<std::mutex> lk(tracker_mtx_);
         tracker_cv_.wait(lk, [this]{return new_frame_ready_ || stop_threads_;});
+        cout << "tracking frame" <<endl;
         Track();
         new_frame_ready_ = false;
+        cout << "Tracking finished" << endl;
     }
 }
 
