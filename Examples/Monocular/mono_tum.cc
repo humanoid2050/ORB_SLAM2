@@ -65,6 +65,7 @@ int main(int argc, char **argv)
     std::chrono::steady_clock::duration track_time(0);
     // Main loop
     cv::UMat im;
+    std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
     for(int ni=0; ni<nImages; ni++)
     {
         // Read image from file
@@ -107,7 +108,7 @@ int main(int argc, char **argv)
         if(ttrack<T)
             usleep((T-ttrack)*1e6);
     }
-
+    std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
     // Stop all threads
     SLAM.Shutdown();
 
@@ -123,7 +124,7 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime/nImages << endl;
     cout << "total tracking time: " << track_time.count() << endl;
     cout << "tracking wait count " << SLAM.wait_count << endl;
-
+    cout << "total system time " << (t3-t0).count();
     // Save camera trajectory
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
