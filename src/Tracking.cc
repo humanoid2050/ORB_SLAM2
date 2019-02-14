@@ -47,13 +47,12 @@ void Tracking::queueImg(const cv::UMat &im, const double &timestamp)
     cout << "queueing" <<endl;
     {
         std::unique_lock<std::mutex> lk(frame_maker_mtx_);
-        mImGray = im;
-        mTimestamp = timestamp;
+        mImGray.emplace(im.clone());
+        mTimestamp.emplace(timestamp);
         new_image_ready_ = true;
     }
     cout << "submitted" <<endl;
     frame_maker_cv_.notify_one();
-    
 }
 
 void Tracking::make_frame_loop() 
@@ -69,8 +68,10 @@ void Tracking::make_frame_loop()
             frame_maker_cv_.wait(lk, [this]{return new_image_ready_ || stop_threads_;});
             if (stop_threads_) break;
             cout << "making frame in " << std::this_thread::get_id() <<endl;
-            mImGray.copyTo(localImg);
-            localTime = mTimestamp;
+            cv::swap(mImGray.front(),localImg);
+            localTime = mTimestamp.front();
+            mImGray.pop();
+            mTimestamp.pop();
             new_image_ready_ = false;
         }
         
@@ -81,7 +82,7 @@ void Tracking::make_frame_loop()
             else
                 cvtColor(localImg,localImg,CV_BGR2GRAY);
         }
-        else if(mImGray.channels()==4)
+        else if(localImg.channels()==4)
         {
             if(mbRGB)
                 cvtColor(localImg,localImg,CV_RGBA2GRAY);
@@ -233,7 +234,7 @@ void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
     mpLoopClosing=pLoopClosing;
 }
 
-
+/*
 cv::Mat Tracking::GrabImageMonocular(const cv::UMat &im, const double &timestamp)
 {
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
@@ -274,6 +275,7 @@ cv::Mat Tracking::GrabImageMonocular(const cv::UMat &im, const double &timestamp
     
     return mCurrentFrame.mTcw.clone();
 }
+*/
 
 void Tracking::Track()
 {
