@@ -65,8 +65,9 @@ void Tracking::make_frame_loop()
         
         {
             std::unique_lock<std::mutex> lk(frame_maker_mtx_);
+            if (stop_threads_ && mImGray.empty()) break;
             frame_maker_cv_.wait(lk, [this]{return new_image_ready_ || stop_threads_;});
-            if (stop_threads_) break;
+            if (stop_threads_ && mImGray.empty()) break;
             cout << "making frame in " << std::this_thread::get_id() <<endl;
             cv::swap(mImGray.front(),localImg);
             localTime = mTimestamp.front();
@@ -222,6 +223,14 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, Map *pMap, KeyFrameDatabas
     }
     tracker_thread_ = std::thread(std::bind(&Tracking::track_loop,this));
 
+}
+
+Tracking::~Tracking()
+{
+    stop_threads_ = true;
+    for (auto& t : worker_threads_) {
+        t.join();
+    }
 }
 
 void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)

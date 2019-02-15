@@ -56,7 +56,8 @@ public:
     Tracking(System* pSys, ORBVocabulary* pVoc, Map* pMap,
              KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
 
-
+    ~Tracking();
+    
     void make_frame_loop();
     void track_loop();
     void queueImg(const cv::UMat &im, const double &timestamp);
