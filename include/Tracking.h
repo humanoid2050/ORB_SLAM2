@@ -56,7 +56,7 @@ public:
     Tracking(System* pSys, ORBVocabulary* pVoc, Map* pMap,
              KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
 
-    ~Tracking();
+    void waitForClose();
     
     void make_frame_loop();
     void track_loop();

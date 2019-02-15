@@ -100,6 +100,8 @@ void Tracking::make_frame_loop()
         tracker_cv_.notify_one();
         
     }
+    
+    cout << "make_frame_loop exited" << endl;
 }
 
 void Tracking::track_loop()
@@ -107,12 +109,14 @@ void Tracking::track_loop()
     while (true) {
         
         std::unique_lock<std::mutex> lk(tracker_mtx_);
-        tracker_cv_.wait(lk, [this]{return new_frame_ready_ || stop_threads_;});
+        tracker_cv_.wait(lk, [this]{return new_frame_ready_;});
         cout << "tracking frame" <<endl;
         Track();
         new_frame_ready_ = false;
         cout << "Tracking finished" << endl;
     }
+    
+    cout << "track_loop exited" << endl;
 }
 
 Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, Map *pMap, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor):
@@ -225,9 +229,14 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, Map *pMap, KeyFrameDatabas
 
 }
 
-Tracking::~Tracking()
+void Tracking::waitForClose()
 {
+    cout << "======================= waitForClose" << endl;
     stop_threads_ = true;
+    {
+        std::unique_lock<std::mutex> lk(frame_maker_mtx_);
+    }
+    frame_maker_cv_.notify_all();
     for (auto& t : worker_threads_) {
         t.join();
     }
