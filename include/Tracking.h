@@ -219,6 +219,8 @@ public:
     std::chrono::steady_clock::duration df5;
     
     std::mutex tracker_mtx_;
+    
+    int frame_count_;
     /*
     std::mutex frame_maker_mtx_;
     

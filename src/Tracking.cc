@@ -45,7 +45,7 @@ namespace ORB_SLAM2
 Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, Map *pMap, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor):
     mState(NO_IMAGES_YET), mSensor(sensor), mbOnlyTracking(false), mbVO(false), mpORBVocabulary(pVoc),
     mpKeyFrameDB(pKFDB), mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys),  mpMap(pMap), mnLastRelocFrameId(0),
-    d1(0),d2(0), d3(0),d4(0),d5(0),  df1(0),df2(0), df3(0),df4(0),df5(0)
+    d1(0),d2(0), d3(0),d4(0),d5(0),  df1(0),df2(0), df3(0),df4(0),df5(0) ,frame_count_(0)
 {
     // Load camera parameters from settings file
 
@@ -205,7 +205,7 @@ void Tracking::Track(Frame frame)
 {
     std::lock_guard<std::mutex> tracking_lock(tracker_mtx_);
     std::swap(mCurrentFrame,frame);
-    
+    ++frame_count_;
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     if (mState == NO_IMAGES_YET){
         mState = NOT_INITIALIZED;

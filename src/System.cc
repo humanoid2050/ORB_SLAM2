@@ -339,6 +339,7 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
     cout << "      - time in Tracking::Relocalization: " << mpTracker->d3.count() << endl;
     cout << "> time in System::TrackMonocular post Tracking::GrabImageMonocular: " << track_mono_dur_b.count() << endl;
     
+    cout << "Tracking iteration count " << mpTracker->frame_count_ << std::endl;
     
 }
 /*
