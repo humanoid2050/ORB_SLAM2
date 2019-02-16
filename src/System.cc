@@ -96,10 +96,15 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
     
-    frame_maker_pool_.setFunction(FrameMaker(strSettingsFile,mpVocabulary,[this](Frame frame){mpTracker->Track(frame);}));
+    frame_maker_pool_.setFunction(FrameMaker(strSettingsFile,mpVocabulary,[this](Frame frame){tracking_thread_.dispatch(frame);}));
     frame_maker_pool_.setBlocking();
     frame_maker_pool_.setMaxQueueSize(4);
     frame_maker_pool_.start(2);
+    
+    tracking_thread_.setFunction(std::bind(&Tracking::Track,mpTracker,std::placeholders::_1));
+    tracking_thread_.setBlocking();
+    tracking_thread_.setMaxQueueSize(2);
+    tracking_thread_.start(1);
 }
 
 cv::Mat System::TrackMonocular(const cv::UMat &im, const double &timestamp)
@@ -154,12 +159,12 @@ cv::Mat System::TrackMonocular(const cv::UMat &im, const double &timestamp)
     
     const std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
     
-    
+    /*
     unique_lock<mutex> lock2(mMutexState);
     mTrackingState = mpTracker->mState;
     mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
-    
+    */
     const std::chrono::steady_clock::time_point t4 = std::chrono::steady_clock::now();
     assert(t2>t1);
     assert(t3>t2);
@@ -210,6 +215,7 @@ void System::Shutdown()
     
     
     frame_maker_pool_.waitForStop();
+    tracking_thread_.waitForStop();
 
     // Wait until all thread have effectively stopped
     while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
@@ -218,7 +224,7 @@ void System::Shutdown()
     }
 
 }
-
+/*
 void System::SaveTrajectoryTUM(const string &filename)
 {
     cout << endl << "Saving camera trajectory to " << filename << " ..." << endl;
@@ -278,7 +284,7 @@ void System::SaveTrajectoryTUM(const string &filename)
     f.close();
     cout << endl << "trajectory saved!" << endl;
 }
-
+*/
 
 void System::SaveKeyFrameTrajectoryTUM(const string &filename)
 {
@@ -335,7 +341,7 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
     
     
 }
-
+/*
 void System::SaveTrajectoryKITTI(const string &filename)
 {
     cout << endl << "Saving camera trajectory to " << filename << " ..." << endl;
@@ -390,7 +396,8 @@ void System::SaveTrajectoryKITTI(const string &filename)
     f.close();
     cout << endl << "trajectory saved!" << endl;
 }
-
+*/
+/*
 int System::GetTrackingState()
 {
     unique_lock<mutex> lock(mMutexState);
@@ -408,5 +415,5 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
     unique_lock<mutex> lock(mMutexState);
     return mTrackedKeyPointsUn;
 }
-
+*/
 } //namespace ORB_SLAM

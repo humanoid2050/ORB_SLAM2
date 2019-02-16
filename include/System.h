@@ -101,7 +101,7 @@ public:
     // Only for stereo and RGB-D. This method does not work for monocular.
     // Call first Shutdown()
     // See format details at: http://vision.in.tum.de/data/datasets/rgbd-dataset
-    void SaveTrajectoryTUM(const string &filename);
+    //void SaveTrajectoryTUM(const string &filename);
 
     // Save keyframe poses in the TUM RGB-D dataset format.
     // This method works for all sensor input.
@@ -113,7 +113,7 @@ public:
     // Only for stereo and RGB-D. This method does not work for monocular.
     // Call first Shutdown()
     // See format details at: http://www.cvlibs.net/datasets/kitti/eval_odometry.php
-    void SaveTrajectoryKITTI(const string &filename);
+    //void SaveTrajectoryKITTI(const string &filename);
 
     // TODO: Save/Load functions
     // SaveMap(const string &filename);
@@ -121,9 +121,9 @@ public:
 
     // Information from most recent processed frame
     // You can call this right after TrackMonocular (or stereo or RGBD)
-    int GetTrackingState();
-    std::vector<MapPoint*> GetTrackedMapPoints();
-    std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
+    //int GetTrackingState();
+    //std::vector<MapPoint*> GetTrackedMapPoints();
+    //std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
 private:
 
@@ -166,12 +166,13 @@ private:
     bool mbDeactivateLocalizationMode;
 
     // Tracking state
-    int mTrackingState;
-    std::vector<MapPoint*> mTrackedMapPoints;
-    std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
-    std::mutex mMutexState;
+    //int mTrackingState;
+    //std::vector<MapPoint*> mTrackedMapPoints;
+    //std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
+    //std::mutex mMutexState;
     
     ThreadPool<cv::UMat,FrameMaker> frame_maker_pool_;
+    ThreadPool<Frame,std::function<void(Frame)>> tracking_thread_;
 public:
     uint32_t wait_count;
     std::chrono::steady_clock::duration track_mono_dur;

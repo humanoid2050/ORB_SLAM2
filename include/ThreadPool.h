@@ -90,8 +90,8 @@ public:
         if (data_queue_.size() >= max_queue_size_) {
             if (blocking_enqueue_) {
                 //wait for free space
-                data_extracted_cv_.wait(lk,[this]{return (data_queue_.size() < max_queue_size_) || hard_stop_;});
-                if (hard_stop_) return;
+                data_extracted_cv_.wait(lk,[this]{return (data_queue_.size() < max_queue_size_) || hard_stop_ || soft_stop_;});
+                if (hard_stop_ || soft_stop_) return;
             } else {
                 //destroy the oldest thing in the queue
                 data_queue_.pop();
