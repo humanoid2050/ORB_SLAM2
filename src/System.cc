@@ -25,6 +25,7 @@
 #include <thread>
 #include <iomanip>
 
+
 namespace ORB_SLAM2
 {
 
@@ -94,6 +95,11 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpLocalMapper->SetLoopCloser(mpLoopCloser);
 
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
+    
+    frame_maker_pool_.setFunction(FrameMaker(strSettingsFile,mpVocabulary,[this](Frame frame){mpTracker->Track(frame);}));
+    frame_maker_pool_.setBlocking();
+    frame_maker_pool_.setMaxQueueSize(4);
+    frame_maker_pool_.start(2);
 }
 
 cv::Mat System::TrackMonocular(const cv::UMat &im, const double &timestamp)
@@ -144,7 +150,7 @@ cv::Mat System::TrackMonocular(const cv::UMat &im, const double &timestamp)
     
     cv::Mat Tcw;// = mpTracker->GrabImageMonocular(im,timestamp);
     
-    mpTracker->queueImg(im,timestamp);
+    frame_maker_pool_.dispatch(im);
     
     const std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
     
@@ -202,7 +208,7 @@ void System::Shutdown()
     mpLocalMapper->RequestFinish();
     mpLoopCloser->RequestFinish();
     
-    mpTracker->waitForClose();
+    //mpTracker->waitForClose();
 
     // Wait until all thread have effectively stopped
     while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())

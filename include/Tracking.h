@@ -56,11 +56,11 @@ public:
     Tracking(System* pSys, ORBVocabulary* pVoc, Map* pMap,
              KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
 
-    void waitForClose();
+   // void waitForClose();
     
-    void make_frame_loop();
-    void track_loop();
-    void queueImg(const cv::UMat &im, const double &timestamp);
+    //void make_frame_loop();
+    //void track_loop();
+    //void queueImg(const cv::UMat &im, const double &timestamp);
 
     // Preprocess the input and call Track(). Extract features and performs stereo matching.
     //cv::Mat GrabImageStereo(const cv::Mat &imRectLeft,const cv::Mat &imRectRight, const double &timestamp);
@@ -120,11 +120,13 @@ public:
     bool mbOnlyTracking;
 
     void Reset();
+    
+    
+    // Main tracking function. It is independent of the input sensor.
+    void Track(Frame frame);
 
 protected:
 
-    // Main tracking function. It is independent of the input sensor.
-    void Track();
 
 
     // Map initialization for monocular

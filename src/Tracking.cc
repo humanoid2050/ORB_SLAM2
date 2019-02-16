@@ -41,7 +41,7 @@ using namespace std;
 
 namespace ORB_SLAM2
 {
-    
+/*
 void Tracking::queueImg(const cv::UMat &im, const double &timestamp)
 {
     cout << "queueing" <<endl;
@@ -78,17 +78,13 @@ void Tracking::make_frame_loop()
         
         if(localImg.channels()==3)
         {
-            if(mbRGB)
-                cvtColor(localImg,localImg,CV_RGB2GRAY);
-            else
-                cvtColor(localImg,localImg,CV_BGR2GRAY);
+            if(mbRGB) cvtColor(localImg,localImg,CV_RGB2GRAY);
+            else cvtColor(localImg,localImg,CV_BGR2GRAY);
         }
         else if(localImg.channels()==4)
         {
-            if(mbRGB)
-                cvtColor(localImg,localImg,CV_RGBA2GRAY);
-            else
-                cvtColor(localImg,localImg,CV_BGRA2GRAY);
+            if(mbRGB) cvtColor(localImg,localImg,CV_RGBA2GRAY);
+            else cvtColor(localImg,localImg,CV_BGRA2GRAY);
         }
         localFrame = Frame(localImg,localTime,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
         {
@@ -118,7 +114,7 @@ void Tracking::track_loop()
     
     cout << "track_loop exited" << endl;
 }
-
+*/
 Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, Map *pMap, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor):
     mState(NO_IMAGES_YET), mSensor(sensor), mbOnlyTracking(false), mbVO(false), mpORBVocabulary(pVoc),
     mpKeyFrameDB(pKFDB), mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys),  mpMap(pMap), mnLastRelocFrameId(0),
@@ -221,14 +217,14 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, Map *pMap, KeyFrameDatabas
         else
             mDepthMapFactor = 1.0f/mDepthMapFactor;
     }
-    
+    /*
     for (auto& t : worker_threads_) {
         t = std::thread(std::bind(&Tracking::make_frame_loop,this));
     }
     tracker_thread_ = std::thread(std::bind(&Tracking::track_loop,this));
-
+*/
 }
-
+/*
 void Tracking::waitForClose()
 {
     cout << "======================= waitForClose" << endl;
@@ -241,7 +237,7 @@ void Tracking::waitForClose()
         t.join();
     }
 }
-
+*/
 void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)
 {
     mpLocalMapper=pLocalMapper;
@@ -295,8 +291,11 @@ cv::Mat Tracking::GrabImageMonocular(const cv::UMat &im, const double &timestamp
 }
 */
 
-void Tracking::Track()
+void Tracking::Track(Frame frame)
 {
+    std::lock_guard<std::mutex> tracking_lock(tracker_mtx_);
+    std::swap(mCurrentFrame,frame);
+    
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     if (mState == NO_IMAGES_YET){
         mState = NOT_INITIALIZED;
@@ -309,9 +308,7 @@ void Tracking::Track()
 
     if (mState == NOT_INITIALIZED) {
         MonocularInitialization();
-
-        if (mState!=OK)
-            return;
+        if (mState!=OK) return;
     } else {
         // System is initialized. Track Frame.
         bool bOK;
@@ -402,10 +399,8 @@ void Tracking::Track()
                 bOK = TrackLocalMap();
         }
 
-        if(bOK)
-            mState = OK;
-        else
-            mState=LOST;
+        if(bOK) mState = OK;
+        else mState=LOST;
 
         // If tracking were good, check if we insert a keyframe
         if(bOK) {

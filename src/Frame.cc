@@ -150,7 +150,7 @@ void Frame::AssignFeaturesToGrid()
             mGrid[nGridPosX][nGridPosY].push_back(i);
     }
 }
-
+/*
 inline void Frame::ExtractORB(int flag, const cv::UMat &im)
 {
     if(flag==0) {
@@ -162,7 +162,7 @@ inline void Frame::ExtractORB(int flag, const cv::UMat &im)
         
     std::cout << "descriptor dims: " << mDescriptors.rows << " " << mDescriptors.cols << std::endl;
 }
-
+*/
 void Frame::SetPose(cv::Mat Tcw)
 {
     mTcw = Tcw.clone();
@@ -373,7 +373,7 @@ void Frame::ComputeImageBounds(const cv::UMat &imLeft)
         mnMaxY = imLeft.rows;
     }
 }
-
+/*
 void Frame::ComputeStereoMatches()
 {
     mvuRight = vector<float>(N,-1.0f);
@@ -573,7 +573,7 @@ void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth)
         }
     }
 }
-
+*/
 cv::Mat Frame::UnprojectStereo(const int &i)
 {
     const float z = mvDepth[i];

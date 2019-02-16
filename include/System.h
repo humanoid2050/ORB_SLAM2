@@ -26,6 +26,9 @@
 #include <thread>
 #include <opencv2/core/core.hpp>
 
+
+#include "FrameMaker.h"
+#include "ThreadPool.h"
 #include "Tracking.h"
 
 #include "Map.h"
@@ -44,6 +47,7 @@ class Map;
 class Tracking;
 class LocalMapping;
 class LoopClosing;
+class FrameMaker;
 
 class System
 {
@@ -166,6 +170,8 @@ private:
     std::vector<MapPoint*> mTrackedMapPoints;
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
+    
+    ThreadPool<cv::UMat,FrameMaker> frame_maker_pool_;
 public:
     uint32_t wait_count;
     std::chrono::steady_clock::duration track_mono_dur;
