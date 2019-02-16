@@ -14,11 +14,11 @@ template <class T, class Function>
 class ThreadPool
 {
 public:
-    ThreadPool() : max_queue_size_(INT_MAX), stop_thread_(false), blocking_enqueue_(false)
+    ThreadPool() : max_queue_size_(INT_MAX), hard_stop_(false), soft_stop_(false), blocking_enqueue_(false)
     {}
     
     ThreadPool(std::size_t count, Function func) : 
-        max_queue_size_(INT_MAX), stop_thread_(false), blocking_enqueue_(false), func_(func), 
+        max_queue_size_(INT_MAX), hard_stop_(false), soft_stop_(false), blocking_enqueue_(false), func_(func), 
         thread_pool_(count,std::bind(&ThreadPool::threadCore,this))
     {}
     
@@ -45,9 +45,22 @@ public:
     
     void stop()
     {
-        stop_thread_ = true;
+        hard_stop_ = true;
         enqueue_cv_.notify_all();
         data_extracted_cv_.notify_all();
+        for (auto& t : thread_pool_) {
+            t.join();
+        }
+    }
+    
+    void waitForStop()
+    {
+        soft_stop_ = true;
+        enqueue_cv_.notify_all();
+        data_extracted_cv_.notify_all();
+        for (auto& t : thread_pool_) {
+            t.join();
+        }
     }
     
     void dispatch(const T& data)
@@ -58,8 +71,8 @@ public:
         if (data_queue_.size() >= max_queue_size_) {
             if (blocking_enqueue_) {
                 //wait for free space
-                data_extracted_cv_.wait(lk,[this]{return (data_queue_.size() < max_queue_size_) || stop_thread_;});
-                if (stop_thread_) return;
+                data_extracted_cv_.wait(lk,[this]{return (data_queue_.size() < max_queue_size_) || hard_stop_ || soft_stop_;});
+                if (hard_stop_ || soft_stop_) return;
             } else {
                 //destroy the oldest thing in the queue
                 data_queue_.pop();
@@ -77,8 +90,8 @@ public:
         if (data_queue_.size() >= max_queue_size_) {
             if (blocking_enqueue_) {
                 //wait for free space
-                data_extracted_cv_.wait(lk,[this]{return (data_queue_.size() < max_queue_size_) || stop_thread_;});
-                if (stop_thread_) return;
+                data_extracted_cv_.wait(lk,[this]{return (data_queue_.size() < max_queue_size_) || hard_stop_;});
+                if (hard_stop_) return;
             } else {
                 //destroy the oldest thing in the queue
                 data_queue_.pop();
@@ -94,14 +107,16 @@ protected:
     {
         std::cout << "launching a threadCore()" <<std::endl;
         T local_data;
-        while (true) {
+        while (!hard_stop_) {
             //wait for notification and extract from queue 
             {
                 std::unique_lock<std::mutex> lk(enqueue_mtx_);
                 if (data_queue_.empty()) {
+                    if (soft_stop_ || hard_stop_) break;
                     //std::cout << "waiting for enqueue notification" <<std::endl;
-                    enqueue_cv_.wait(lk,[this]{ return !data_queue_.empty() || stop_thread_; });
-                    if (stop_thread_) break;
+                    enqueue_cv_.wait(lk,[this]{ return !data_queue_.empty() || hard_stop_ || soft_stop_; });
+                    if (hard_stop_) break;
+                    if (data_queue_.empty()) break;
                 }
                 std::swap(local_data,data_queue_.front());
                 data_queue_.pop();
@@ -116,7 +131,8 @@ protected:
     std::size_t max_queue_size_;
     std::queue<T> data_queue_;
 
-    bool stop_thread_;
+    bool hard_stop_;
+    bool soft_stop_;
     bool blocking_enqueue_;
     
     std::vector<std::thread> thread_pool_;
