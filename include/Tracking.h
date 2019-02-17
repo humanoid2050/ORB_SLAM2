@@ -54,14 +54,7 @@ class Tracking
 
 public:
     Tracking(System* pSys, ORBVocabulary* pVoc, Map* pMap,
-             KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
-
-
-    // Preprocess the input and call Track(). Extract features and performs stereo matching.
-    //cv::Mat GrabImageStereo(const cv::Mat &imRectLeft,const cv::Mat &imRectRight, const double &timestamp);
-    //cv::Mat GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const double &timestamp);
-    
-    //cv::Mat GrabImageMonocular(const cv::UMat &im, const double &timestamp);
+             KeyFrameDatabase* pKFDB);
 
     void SetLocalMapper(LocalMapping* pLocalMapper);
     void SetLoopClosing(LoopClosing* pLoopClosing);
@@ -69,7 +62,7 @@ public:
     // Load new settings
     // The focal lenght should be similar or scale prediction will fail when projecting points
     // TODO: Modify MapPoint::PredictScale to take into account focal lenght
-    void ChangeCalibration(const string &strSettingPath);
+    //void ChangeCalibration(const string &strSettingPath);
 
     // Use this function if you have deactivated local mapping and you only want to localize the camera.
     void InformOnlyTracking(const bool &flag);
@@ -94,13 +87,10 @@ protected:
     eTrackingState mState;
     eTrackingState mLastProcessedState;
 
-    // Input sensor
-    int mSensor;
 
     // Current Frame
     Frame mCurrentFrame;
-    std::queue<cv::UMat> mImGray;
-    std::queue<double> mTimestamp;
+
 
     // Initialization Variables (Monocular)
     std::vector<int> mvIniLastMatches;
@@ -150,10 +140,6 @@ protected:
     LocalMapping* mpLocalMapper;
     LoopClosing* mpLoopClosing;
 
-    //ORB
-    ORBextractor* mpORBextractorLeft, *mpORBextractorRight;
-    ORBextractor* mpIniORBextractor;
-
     //BoW
     ORBVocabulary* mpORBVocabulary;
     KeyFrameDatabase* mpKeyFrameDB;
@@ -172,10 +158,6 @@ protected:
     //Map
     Map* mpMap;
 
-    //Calibration matrix
-    cv::Mat mK;
-    cv::Mat mDistCoef;
-    float mbf;
 
     //New KeyFrame rules (according to fps)
     int mMinFrames;
@@ -185,9 +167,6 @@ protected:
     // Points seen as close by the stereo/RGBD sensor are considered reliable
     // and inserted from just one frame. Far points requiere a match in two keyframes.
     float mThDepth;
-
-    // For RGB-D inputs only. For some datasets (e.g. TUM) the depthmap values are scaled.
-    float mDepthMapFactor;
 
     //Current matches in frame
     int mnMatchesInliers;
@@ -201,37 +180,16 @@ protected:
     //Motion Model
     cv::Mat mVelocity;
 
-    //Color order (true RGB, false BGR, ignored if grayscale)
-    bool mbRGB;
-
     list<MapPoint*> mlpTemporalPoints;
 public:
-    std::chrono::steady_clock::duration d1;
+
     std::chrono::steady_clock::duration d2;
     std::chrono::steady_clock::duration d3;
-    std::chrono::steady_clock::duration d4;
-    std::chrono::steady_clock::duration d5;
-    
-    std::chrono::steady_clock::duration df1;
-    std::chrono::steady_clock::duration df2;
-    std::chrono::steady_clock::duration df3;
-    std::chrono::steady_clock::duration df4;
-    std::chrono::steady_clock::duration df5;
-    
+
     std::mutex tracker_mtx_;
     
     int frame_count_;
-    /*
-    std::mutex frame_maker_mtx_;
-    
-    std::condition_variable frame_maker_cv_;
-    std::condition_variable tracker_cv_;
-    std::array<std::thread,2> worker_threads_;
-    std::thread tracker_thread_;
-    bool stop_threads_;
-    bool new_image_ready_;
-    bool new_frame_ready_;
-    */
+
 };
 
 } //namespace ORB_SLAM

@@ -116,7 +116,7 @@ protected:
                     //std::cout << "waiting for enqueue notification" <<std::endl;
                     enqueue_cv_.wait(lk,[this]{ return !data_queue_.empty() || hard_stop_ || soft_stop_; });
                     if (hard_stop_) break;
-                    if (data_queue_.empty()) break;
+                    if (soft_stop_ && data_queue_.empty()) break;
                 }
                 std::swap(local_data,data_queue_.front());
                 data_queue_.pop();
