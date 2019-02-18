@@ -109,18 +109,17 @@ protected:
         T local_data;
         while (!hard_stop_) {
             //wait for notification and extract from queue 
-            {
-                std::unique_lock<std::mutex> lk(enqueue_mtx_);
-                if (data_queue_.empty()) {
-                    if (soft_stop_ || hard_stop_) break;
-                    //std::cout << "waiting for enqueue notification" <<std::endl;
-                    enqueue_cv_.wait(lk,[this]{ return !data_queue_.empty() || hard_stop_ || soft_stop_; });
-                    if (hard_stop_) break;
-                    if (data_queue_.empty()) break;
-                }
-                std::swap(local_data,data_queue_.front());
-                data_queue_.pop();
+            std::unique_lock<std::mutex> lk(enqueue_mtx_);
+            if (data_queue_.empty()) {
+                if (soft_stop_ || hard_stop_) break;
+                //std::cout << "waiting for enqueue notification" <<std::endl;
+                enqueue_cv_.wait(lk,[this]{ return !data_queue_.empty() || hard_stop_ || soft_stop_; });
+                if (hard_stop_) break;
+                if (data_queue_.empty()) break;
             }
+            std::swap(local_data,data_queue_.front());
+            data_queue_.pop();
+            lk.unlock();
             data_extracted_cv_.notify_one();
             func_(local_data);
         }
