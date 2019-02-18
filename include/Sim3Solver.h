@@ -36,7 +36,7 @@ class Sim3Solver
 {
 public:
 
-    Sim3Solver(KeyFrame* pKF1, KeyFrame* pKF2, const std::vector<MapPoint*> &vpMatched12, const bool bFixScale = true);
+    Sim3Solver(KeyFrame* pKF1, KeyFrame* pKF2, const std::vector<MapPoint*> &vpMatched12);
 
     void SetRansacParameters(double probability = 0.99, int minInliers = 6 , int maxIterations = 300);
 
@@ -98,9 +98,6 @@ protected:
     cv::Mat mBestRotation;
     cv::Mat mBestTranslation;
     float mBestScale;
-
-    // Scale is fixed to 1 in the stereo/RGBD case
-    bool mbFixScale;
 
     // Indices for random selection
     std::vector<size_t> mvAllIndices;

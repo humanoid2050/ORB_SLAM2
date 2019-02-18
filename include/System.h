@@ -62,7 +62,7 @@ public:
 public:
 
     // Initialize the SLAM system. It launches the Local Mapping, and Loop Closing threads.
-    System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor);
+    System(const string &strVocFile, const string &strSettingsFile);
 
     // Proccess the given stereo frame. Images must be synchronized and rectified.
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
@@ -126,9 +126,6 @@ public:
     //std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
 private:
-
-    // Input sensor
-    eSensor mSensor;
 
     // ORB vocabulary used for place recognition and feature matching.
     ORBVocabulary* mpVocabulary;

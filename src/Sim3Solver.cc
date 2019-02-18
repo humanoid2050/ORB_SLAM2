@@ -33,8 +33,8 @@ namespace ORB_SLAM2
 {
 
 
-Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2, const vector<MapPoint *> &vpMatched12, const bool bFixScale):
-    mnIterations(0), mnBestInliers(0), mbFixScale(bFixScale)
+Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2, const vector<MapPoint *> &vpMatched12):
+    mnIterations(0), mnBestInliers(0)
 {
     mpKF1 = pKF1;
     mpKF2 = pKF2;
@@ -288,8 +288,7 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
 
     // Step 6: Scale
 
-    if(!mbFixScale)
-    {
+
         double nom = Pr1.dot(P3);
         cv::Mat aux_P3(P3.size(),P3.type());
         aux_P3=P3;
@@ -305,9 +304,7 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
         }
 
         ms12i = nom/den;
-    }
-    else
-        ms12i = 1.0f;
+
 
     // Step 7: Translation
 

@@ -54,7 +54,7 @@ class Tracking
 
 public:
     Tracking(System* pSys, ORBVocabulary* pVoc, Map* pMap,
-             KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
+             KeyFrameDatabase* pKFDB, const string &strSettingPath);
 
 
     // Preprocess the input and call Track(). Extract features and performs stereo matching.
@@ -93,9 +93,6 @@ protected:
 
     eTrackingState mState;
     eTrackingState mLastProcessedState;
-
-    // Input sensor
-    int mSensor;
 
     // Current Frame
     Frame mCurrentFrame;
@@ -150,10 +147,6 @@ protected:
     LocalMapping* mpLocalMapper;
     LoopClosing* mpLoopClosing;
 
-    //ORB
-    ORBextractor* mpORBextractorLeft, *mpORBextractorRight;
-    ORBextractor* mpIniORBextractor;
-
     //BoW
     ORBVocabulary* mpORBVocabulary;
     KeyFrameDatabase* mpKeyFrameDB;
@@ -206,17 +199,10 @@ protected:
 
     list<MapPoint*> mlpTemporalPoints;
 public:
-    std::chrono::steady_clock::duration d1;
+    
     std::chrono::steady_clock::duration d2;
     std::chrono::steady_clock::duration d3;
-    std::chrono::steady_clock::duration d4;
-    std::chrono::steady_clock::duration d5;
     
-    std::chrono::steady_clock::duration df1;
-    std::chrono::steady_clock::duration df2;
-    std::chrono::steady_clock::duration df3;
-    std::chrono::steady_clock::duration df4;
-    std::chrono::steady_clock::duration df5;
     
     std::mutex tracker_mtx_;
     
